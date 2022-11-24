@@ -21,7 +21,29 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 
+async function run() {
+    try {
+        const usePhoneCollections = client.db('usedPhone').collection('usedPhoneCollection');
+        // const bookingsCollection = client.db('doctorsPortal').collection('bookings');
+        // const usersCollection = client.db('doctorsPortal').collection('users');
+        // const doctorsCollection = client.db('doctorsPortal').collection('doctors');
+        // const paymentsCollection = client.db('doctorsPortal').collection('payments');
 
+        // Load Home Page 3 category data 
+        app.get('/categories', async (req, res) => {
+            const query = {}
+            const phones = await usePhoneCollections.find(query).toArray();
+            res.send(phones);
+        })
+
+
+
+    }
+    finally {
+
+    }
+}
+run().catch(console.log);
 
 
 
