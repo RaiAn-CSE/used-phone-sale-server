@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 // const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 // const jwt = require('jsonwebtoken');
 require('dotenv').config();
@@ -29,13 +29,20 @@ async function run() {
         // const doctorsCollection = client.db('doctorsPortal').collection('doctors');
         // const paymentsCollection = client.db('doctorsPortal').collection('payments');
 
-        // Load Home Page 3 category data 
+        // Load Home Page 3 category data :
         app.get('/categories', async (req, res) => {
             const query = {}
             const phones = await usePhoneCollections.find(query).toArray();
             res.send(phones);
         })
 
+        //Load Category Model Details by Category id:
+        app.get('/categories/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const phone = await usePhoneCollections.findOne(query);
+            res.send(phone);
+        })
 
 
     }
