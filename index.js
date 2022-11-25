@@ -25,7 +25,7 @@ async function run() {
     try {
         const usePhoneCollections = client.db('usedPhone').collection('usedPhoneCollection');
         // const bookingsCollection = client.db('doctorsPortal').collection('bookings');
-        // const usersCollection = client.db('doctorsPortal').collection('users');
+        const usersCollection = client.db('usedPhone').collection('users');
         // const doctorsCollection = client.db('doctorsPortal').collection('doctors');
         // const paymentsCollection = client.db('doctorsPortal').collection('payments');
 
@@ -34,7 +34,7 @@ async function run() {
             const query = {}
             const phones = await usePhoneCollections.find(query).toArray();
             res.send(phones);
-        })
+        });
 
         //Load Category Model Details by Category id:
         app.get('/categories/:id', async (req, res) => {
@@ -42,7 +42,15 @@ async function run() {
             const query = { _id: ObjectId(id) };
             const phone = await usePhoneCollections.findOne(query);
             res.send(phone);
-        })
+        });
+
+        // User Information Post in Database :
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            console.log(user);
+            const result = await usersCollection.insertOne(user);
+            res.send(result);
+        });
 
 
     }
