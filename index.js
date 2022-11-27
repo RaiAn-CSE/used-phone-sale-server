@@ -45,7 +45,7 @@ async function run() {
         const usePhoneCollections = client.db('usedPhone').collection('usedPhoneCollection');
         // const bookingsCollection = client.db('doctorsPortal').collection('bookings');
         const usersCollection = client.db('usedPhone').collection('users');
-        // const doctorsCollection = client.db('doctorsPortal').collection('doctors');
+        const productsCollection = client.db('usedPhone').collection('products');
         // const paymentsCollection = client.db('doctorsPortal').collection('payments');
 
         // Load Home Page 3 category data :
@@ -110,7 +110,21 @@ async function run() {
             const query = { email }
             const user = await usersCollection.findOne(query);
             res.send({ isAdmin: user?.role === 'admin' });
-        })
+        });
+
+
+        // Products Collection Save to the database :
+        app.post('/products', async (req, res) => {
+            const product = req.body;
+            const result = await productsCollection.insertOne(product);
+            res.send(result);
+        });
+        // Get Products Collection in UI :
+        app.get('/products', async (req, res) => {
+            const query = {};
+            const product = await productsCollection.find(query).toArray();
+            res.send(product);
+        });
 
 
     }
