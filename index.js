@@ -23,6 +23,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 // JWT Token Verify :
 function verifyJWT(req, res, next) {
+
     const authHeader = req.headers.authorization;
     if (!authHeader) {
         return res.status(401).send('unauthorized access');
@@ -48,13 +49,25 @@ async function run() {
         const productsCollection = client.db('usedPhone').collection('products');
         // const paymentsCollection = client.db('doctorsPortal').collection('payments');
 
+
+        // VerifyAdmin
+        const verifyAdmin = async (req, res, next) => {
+            const decodedEmail = req.decoded.email;
+            const query = { email: decodedEmail };
+            const user = await usersCollection.findOne(query);
+
+            if (user?.role !== 'admin') {
+                return res.status(403).send({ message: 'forbidden access' })
+            }
+            next();
+        }
+
         // Load Home Page 3 category data :
         app.get('/categories', async (req, res) => {
             const query = {}
             const phones = await usePhoneCollections.find(query).toArray();
             res.send(phones);
         });
-
         //Load Category Model Details by Category id:
         app.get('/categories/:id', async (req, res) => {
             const id = req.params.id;
@@ -62,6 +75,7 @@ async function run() {
             const phone = await usePhoneCollections.findOne(query);
             res.send(phone);
         });
+
 
         // JWT Token :
         app.get('/jwt', async (req, res) => {
@@ -75,6 +89,8 @@ async function run() {
             res.status(403).send({ accessToken: '' })
         });
 
+
+
         // User Information Post in Database :
         app.post('/users', async (req, res) => {
             const user = req.body;
@@ -82,7 +98,6 @@ async function run() {
             const result = await usersCollection.insertOne(user);
             res.send(result);
         });
-
         // Get Users From Database :
         app.get('/users', async (req, res) => {
             const query = {};
@@ -90,8 +105,9 @@ async function run() {
             res.send(users);
         });
 
+
         // Make Admin :
-        app.put('/users/admin/:id', verifyJWT, async (req, res) => {
+        app.put('/users/admin/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) }
             const options = { upsert: true };
@@ -103,13 +119,21 @@ async function run() {
             const result = await usersCollection.updateOne(filter, updatedDoc, options);
             res.send(result);
         });
-
         // Get Who is Admin : 
         app.get('/users/admin/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email }
             const user = await usersCollection.findOne(query);
             res.send({ isAdmin: user?.role === 'admin' });
+        });
+
+
+        // Get Who is seller : 
+        app.get('/users/seller/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            const user = await usersCollection.findOne(query);
+            res.send({ isAdmin: user?.role === 'seller' });
         });
 
 
@@ -130,6 +154,22 @@ async function run() {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) };
             const result = await productsCollection.deleteOne(filter);
+            res.send(result);
+        });
+
+
+
+        // Make Seller : 
+        app.put('/users/seller/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    role: 'admin'
+                }
+            }
+            const result = await usersCollection.updateOne(filter, updatedDoc, options);
             res.send(result);
         });
 
