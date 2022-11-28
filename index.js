@@ -44,7 +44,9 @@ function verifyJWT(req, res, next) {
 async function run() {
     try {
         const usePhoneCollections = client.db('usedPhone').collection('usedPhoneCollection');
-        // const bookingsCollection = client.db('doctorsPortal').collection('bookings');
+        const androidCollection = client.db('usedPhone').collection('android');
+        const iosCollection = client.db('usedPhone').collection('ios');
+        const btnCollection = client.db('usedPhone').collection('buttonPhone');
         const usersCollection = client.db('usedPhone').collection('users');
         const productsCollection = client.db('usedPhone').collection('products');
         // const paymentsCollection = client.db('doctorsPortal').collection('payments');
@@ -69,10 +71,18 @@ async function run() {
             res.send(phones);
         });
         //Load Category Model Details by Category id:
-        app.get('/categories/:id', async (req, res) => {
+        app.get('/category/:id', async (req, res) => {
             const id = req.params.id;
-            const query = { _id: ObjectId(id) };
-            const phone = await usePhoneCollections.findOne(query);
+            let phone;
+            if (id === "1") {
+                phone = await androidCollection.find({}).toArray();
+
+            } else if (id === "2") {
+                phone = await iosCollection.find({}).toArray();
+
+            } else {
+                phone = await btnCollection.find({}).toArray();
+            }
             res.send(phone);
         });
 
@@ -90,7 +100,6 @@ async function run() {
         });
 
 
-
         // User Information Post in Database :
         app.post('/users', async (req, res) => {
             const user = req.body;
@@ -98,16 +107,34 @@ async function run() {
             const result = await usersCollection.insertOne(user);
             res.send(result);
         });
-        // Get Users & Sellers From Database :
-        // app.get('/users', async (req, res) => {
-        //     let query = {};
-        //     if (req.query?.email) {
-        //         const email = req.query.email;
-        //         query = { email };
-        //     }
-        //     const users = await usersCollection.find(query).toArray();
-        //     res.send(users);
-        // });
+
+
+
+        // Get Users & Sellers From Database:
+        app.get('/users', async (req, res) => {
+            let query = {};
+            if (req.query?.email) {
+                const email = req.query.email;
+                query = { email: email };
+            }
+            const users = await usersCollection.find(query).toArray();
+            res.send(users);
+        });
+
+
+        app.get('/users/seller', async (req, res) => {
+            const email = req.query.email;
+            const query = { email };
+            const users = await usersCollection.find(query).toArray();
+            if (users) {
+                res.send({ isSeller: 1 })
+            } else {
+
+                res.send({ isSeller: 0 });
+            }
+        });
+
+
 
         // Get Users From Database:
         app.get('/users', async (req, res) => {
@@ -116,19 +143,7 @@ async function run() {
             res.send(users);
         });
 
-        // Make Admin :
-        app.put('/users/admin/:id', async (req, res) => {
-            const id = req.params.id;
-            const filter = { _id: ObjectId(id) }
-            const options = { upsert: true };
-            const updatedDoc = {
-                $set: {
-                    role: 'admin'
-                }
-            }
-            const result = await usersCollection.updateOne(filter, updatedDoc, options);
-            res.send(result);
-        });
+
         // Get Who is Admin : 
         app.get('/users/admin/:email', async (req, res) => {
             const email = req.params.email;
@@ -137,19 +152,22 @@ async function run() {
             res.send({ isAdmin: user?.role === 'admin' });
         });
 
+        // Get Who is Seller : 
+        app.get('/users/seller/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            const user = await usersCollection.findOne(query);
+            res.send({ isSeller: user?.role === 'seller' });
+        });
 
+        // app.get('/dashboard/users', async (req, res) => {
+        //     const role = req.query.role;
+        //     const users = await usersCollection.find({}).toArray()
+        //     const result = usersCollection.filter(product => product.role === role)
+        //     console.log("jsx".result);
+        //     res.send(result)
 
-
-        // // Get Who is seller : 
-        // app.get('/users/:role', async (req, res) => {
-        //     const seller = req.query.role;
-        //     const query = { seller };
-        //     const user = await usersCollection.find(query).toArray();
-        //     res.send({ isSeller: user?.role === 'seller' });
-        // });
-
-
-
+        // })
 
 
 
@@ -175,17 +193,23 @@ async function run() {
 
 
 
-        // Make Seller : 
-        app.put('/users/seller/:id', async (req, res) => {
-            const id = req.params.id;
-            const filter = { _id: ObjectId(id) }
-            const options = { upsert: true };
-            const updatedDoc = {
-                $set: {
-                    role: 'admin'
-                }
+
+
+
+        // Products Collection Save to the Home :
+        app.post('/addProduct', async (req, res) => {
+            const category = req.query.category;
+            const product = req.body;
+            let result
+            if (category === 'Android') {
+                result = await androidCollection.insertOne(product);
+
+            } else if (category === 'IOS') {
+                result = await iosCollection.insertOne(product);
+            } else {
+                result = await btnCollection.insertOne(product);
             }
-            const result = await usersCollection.updateOne(filter, updatedDoc, options);
+            // const product = req.body;
             res.send(result);
         });
 
