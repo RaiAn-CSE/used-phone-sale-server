@@ -98,13 +98,23 @@ async function run() {
             const result = await usersCollection.insertOne(user);
             res.send(result);
         });
-        // Get Users From Database :
+        // Get Users & Sellers From Database :
+        // app.get('/users', async (req, res) => {
+        //     let query = {};
+        //     if (req.query?.email) {
+        //         const email = req.query.email;
+        //         query = { email };
+        //     }
+        //     const users = await usersCollection.find(query).toArray();
+        //     res.send(users);
+        // });
+
+        // Get Users From Database:
         app.get('/users', async (req, res) => {
             const query = {};
             const users = await usersCollection.find(query).toArray();
             res.send(users);
         });
-
 
         // Make Admin :
         app.put('/users/admin/:id', async (req, res) => {
@@ -128,13 +138,19 @@ async function run() {
         });
 
 
-        // Get Who is seller : 
-        app.get('/users/seller/:email', async (req, res) => {
-            const email = req.params.email;
-            const query = { email }
-            const user = await usersCollection.findOne(query);
-            res.send({ isAdmin: user?.role === 'seller' });
-        });
+
+
+        // // Get Who is seller : 
+        // app.get('/users/:role', async (req, res) => {
+        //     const seller = req.query.role;
+        //     const query = { seller };
+        //     const user = await usersCollection.find(query).toArray();
+        //     res.send({ isSeller: user?.role === 'seller' });
+        // });
+
+
+
+
 
 
         // Products Collection Save to the database :
@@ -171,6 +187,18 @@ async function run() {
             }
             const result = await usersCollection.updateOne(filter, updatedDoc, options);
             res.send(result);
+        });
+
+
+
+        // Delete Users :
+        app.delete('/users/:id', async (req, res) => {
+            const id = req.params.id
+            console.log(id)
+            const query = { _id: ObjectId(id) }
+            const result = await usersCollection.deleteOne(query)
+            console.log(result)
+            res.send(result)
         });
 
 
