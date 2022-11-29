@@ -160,15 +160,6 @@ async function run() {
             res.send({ isSeller: user?.role === 'seller' });
         });
 
-        // app.get('/dashboard/users', async (req, res) => {
-        //     const role = req.query.role;
-        //     const users = await usersCollection.find({}).toArray()
-        //     const result = usersCollection.filter(product => product.role === role)
-        //     console.log("jsx".result);
-        //     res.send(result)
-
-        // })
-
 
 
         // Products Collection Save to the database :
@@ -224,6 +215,28 @@ async function run() {
             console.log(result)
             res.send(result)
         });
+
+
+
+        app.get('/dashboard/allsellers', async (req, res) => {
+            const role = req.query.role;
+            console.log(req.query.role);
+            const users = await usersCollection.find({}).toArray()
+            const result = users.filter(product => product.role === role)
+            console.log("jsx".result);
+            res.send(result)
+
+        })
+
+        app.get('/dashboard/allbuyers', async (req, res) => {
+            const role = req.query.role;
+            console.log(req.query.role);
+            const users = await usersCollection.find({}).toArray()
+            const result = users.filter(product => product.role === role)
+            console.log("jsx".result);
+            res.send(result)
+
+        })
 
 
 
