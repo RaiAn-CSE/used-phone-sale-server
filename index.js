@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-// const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 // const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
@@ -50,6 +49,8 @@ async function run() {
         const usersCollection = client.db('usedPhone').collection('users');
         const productsCollection = client.db('usedPhone').collection('products');
         const adCollection = client.db('usedPhone').collection('ad');
+        const bookingsCollections = client.db("usedPhone").collection("bookings");
+        const reportedCollections = client.db("usedPhone").collection("reported")
 
 
         // VerifyAdmin
@@ -185,9 +186,6 @@ async function run() {
 
 
 
-
-
-
         // Products Collection Save to the Home :
         app.post('/addProduct', async (req, res) => {
             const category = req.query.category;
@@ -253,6 +251,60 @@ async function run() {
             const phones = await adCollection.find(query).toArray();
             res.send(phones);
         });
+
+
+
+        //book product
+        app.post('/bookings', async (req, res) => {
+            const data = req.body;
+            const result = await bookingsCollections.insertOne(data)
+            res.send(result)
+        })
+        //get my book products
+        app.get('/bookings', async (req, res) => {
+            const email = req.query.email;
+            const query = { email }
+            const result = await bookingsCollections.find(query).toArray()
+            res.send(result)
+        });
+
+        //delete booked product
+        app.delete('/bookings/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const result = await bookingsCollections.deleteOne(filter)
+            res.send(result)
+        })
+        //get specific booked product
+        app.get('/bookings/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const result = await bookingsCollections.findOne(query)
+            res.send(result)
+        });
+
+
+
+
+
+
+        //reported items post
+        app.post('/reportedItems', async (req, res) => {
+            const data = req.body;
+            const result = await reportedCollections.insertOne(data)
+            res.send(result)
+        })
+        //show reported items
+        app.get('/reportedItems', async (req, res) => {
+            res.send(await reportedCollections.find({}).toArray())
+        })
+        //delete reported items
+        app.delete('/reportedItems/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const result = await reportedCollections.deleteOne(filter)
+            res.send(result)
+        })
 
 
     }
