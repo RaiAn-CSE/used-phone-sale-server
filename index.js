@@ -3,7 +3,6 @@ const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-// const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const port = process.env.PORT || 5000;
 
@@ -217,7 +216,7 @@ async function run() {
 
 
 
-        app.get('/dashboard/allsellers', verifyJWT, async (req, res) => {
+        app.get('/dashboard/allsellers', async (req, res) => {
             const role = req.query.role;
             console.log(req.query.role);
             const users = await usersCollection.find({}).toArray()
@@ -227,7 +226,7 @@ async function run() {
 
         })
 
-        app.get('/dashboard/allbuyers', verifyJWT, async (req, res) => {
+        app.get('/dashboard/allbuyers', async (req, res) => {
             const role = req.query.role;
             console.log(req.query.role);
             const users = await usersCollection.find({}).toArray()
@@ -237,7 +236,7 @@ async function run() {
 
         });
 
-        app.post('/advertise', verifyJWT, async (req, res) => {
+        app.post('/advertise', async (req, res) => {
             const product = req.body;
             console.log(product);
             const result = await adCollection.insertOne(product)
