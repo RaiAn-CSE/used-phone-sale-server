@@ -49,7 +49,7 @@ async function run() {
         const btnCollection = client.db('usedPhone').collection('buttonPhone');
         const usersCollection = client.db('usedPhone').collection('users');
         const productsCollection = client.db('usedPhone').collection('products');
-        // const paymentsCollection = client.db('doctorsPortal').collection('payments');
+        const adCollection = client.db('usedPhone').collection('ad');
 
 
         // VerifyAdmin
@@ -111,7 +111,7 @@ async function run() {
 
 
         // Get Users & Sellers From Database:
-        app.get('/users', async (req, res) => {
+        app.get('/users', verifyJWT, async (req, res) => {
             let query = {};
             if (req.query?.email) {
                 const email = req.query.email;
@@ -170,7 +170,8 @@ async function run() {
         });
         // Get Products Collection in UI :
         app.get('/products', async (req, res) => {
-            const query = {};
+            const email = req.query.email;
+            const query = { sellerEmail: email };
             const product = await productsCollection.find(query).toArray();
             res.send(product);
         });
@@ -218,7 +219,7 @@ async function run() {
 
 
 
-        app.get('/dashboard/allsellers', async (req, res) => {
+        app.get('/dashboard/allsellers', verifyJWT, async (req, res) => {
             const role = req.query.role;
             console.log(req.query.role);
             const users = await usersCollection.find({}).toArray()
@@ -228,7 +229,7 @@ async function run() {
 
         })
 
-        app.get('/dashboard/allbuyers', async (req, res) => {
+        app.get('/dashboard/allbuyers', verifyJWT, async (req, res) => {
             const role = req.query.role;
             console.log(req.query.role);
             const users = await usersCollection.find({}).toArray()
@@ -236,8 +237,22 @@ async function run() {
             console.log("jsx".result);
             res.send(result)
 
+        });
+
+        app.post('/advertise', verifyJWT, async (req, res) => {
+            const product = req.body;
+            console.log(product);
+            const result = await adCollection.insertOne(product)
+            console.log(product);
+            res.send(result)
         })
 
+
+        app.get('/ad', async (req, res) => {
+            const query = {}
+            const phones = await adCollection.find(query).toArray();
+            res.send(phones);
+        });
 
 
     }
